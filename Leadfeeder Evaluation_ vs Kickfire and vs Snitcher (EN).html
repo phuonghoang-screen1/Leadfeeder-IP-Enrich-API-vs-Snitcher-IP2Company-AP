@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Leadfeeder Evaluation: vs Kickfire and vs Snitcher</title><style>
+:root{--bg:#f5f6f4;--code:#eef1ef;--surf:#fff;--ink:#16211d;--mute:#5d6b65;--line:#dde3df;--a:#0f6b5c;--b:#c2410c;--c:#6b7a99;--d:#b9c1bd;--good:#0f6b5c;--bad:#b42318;--warn:#a16207;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1512;--code:#1d2a25;--surf:#16201c;--ink:#e8efeb;--mute:#93a39b;--line:#26332d;--a:#3fb7a0;--b:#f08a4b;--c:#8fa0c4;--d:#4a5852;--good:#3fb7a0;--bad:#f07a6e;--warn:#e0b04a}}
+:root[data-theme="dark"]{--bg:#0e1512;--code:#1d2a25;--surf:#16201c;--ink:#e8efeb;--mute:#93a39b;--line:#26332d;--a:#3fb7a0;--b:#f08a4b;--c:#8fa0c4;--d:#4a5852;--good:#3fb7a0;--bad:#f07a6e;--warn:#e0b04a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.5}
+main{max-width:1080px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:clamp(1.6rem,3.6vw,2.3rem);margin:0 0 6px;letter-spacing:-.02em;line-height:1.2}
+h2{font-size:1.1rem;margin:0 0 4px}
+h3{font-size:.98rem;margin:22px 0 6px}
+p.sub{color:var(--mute);margin:0 0 20px;max-width:70ch}
+.verdict{background:var(--a);color:#fff;border-radius:6px;padding:18px 22px;margin-bottom:20px}
+.verdict strong{display:block;font-size:1.15rem;margin-bottom:4px}
+.verdict span{opacity:.92}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.kpi{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:14px}
+.kpi b{font-size:1.7rem;display:block;line-height:1.1}
+.kpi small{color:var(--mute)}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:18px}
+.card p{margin:6px 0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.note{color:var(--mute);font-size:.88rem;margin:4px 0 14px}
+.row{display:grid;grid-template-columns:minmax(120px,190px) 1fr 62px;gap:10px;align-items:center;margin:7px 0;font-size:.9rem}
+.track{background:var(--line);height:14px;border-radius:3px;overflow:hidden}
+.fill{height:100%;display:block}
+.row span.v{text-align:right;font-variant-numeric:tabular-nums}
+.stack{display:flex;height:34px;border-radius:4px;overflow:hidden;margin:10px 0 12px}
+.stack div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:600;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.84rem}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-weight:600;color:var(--mute)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.78rem;font-weight:600;border:1px solid currentColor}
+.t-good{color:var(--good)}.t-warn{color:var(--warn)}.t-bad{color:var(--bad)}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:5px 0}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:.86rem;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+@media (max-width:520px){.row{grid-template-columns:100px 1fr 54px}}
+
+#snitcher h1{font-size:clamp(1.6rem,3.6vw,2.2rem);line-height:1.2;margin:0 0 8px}
+#snitcher h2{font-size:1.3rem;margin:38px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+#snitcher h3{font-size:1.05rem;margin:24px 0 6px}
+#snitcher p,#snitcher li{max-width:80ch}
+#snitcher p{margin:10px 0}
+#snitcher blockquote{margin:16px 0;padding:10px 16px;background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--a);border-radius:4px}
+#snitcher blockquote p{margin:6px 0}
+#snitcher code{background:var(--code);padding:1px 5px;border-radius:3px;font-size:.86em;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
+#snitcher a,.goto{color:var(--a)}
+#snitcher .tw{margin:14px 0;border:1px solid var(--line);border-radius:6px;background:var(--surf)}
+#snitcher table{min-width:640px}
+#snitcher th{background:var(--code)}
+#snitcher tr:last-child td{border-bottom:0}
+.tabs.top{margin-bottom:24px}
+</style></head><body><main><div class="tabs top" id="nav"><button data-t="kickfire" aria-pressed="true">Leadfeeder vs Kickfire</button><button data-t="snitcher" aria-pressed="false">Leadfeeder vs Snitcher</button></div><section id="kickfire">
+<h1>Can Leadfeeder replace Kickfire?</h1>
+<p class="sub">Tested 4,452 IPs, US IPs prioritized. 3,468 of the trial’s 5,000 API Matches used. Called from Vietnam, ~940 ms/request, no 429 errors.</p>
+
+<div class="verdict"><strong>Verdict: yes, if five conditions are met.</strong><span>Leadfeeder is the best candidate tested so far. When the two vendors disagree on the domain, Leadfeeder is more often right (~40% vs ~20%).</span></div>
+
+<div class="kpis">
+<div class="kpi"><b>91.9%</b><small>US IPs with a good Kickfire result that return a company</small></div>
+<div class="kpi"><b>88.7%</b><small>companies with a domain</small></div>
+<div class="kpi"><b>45%</b><small>domain match with Kickfire</small></div>
+<div class="kpi"><b>97%</b><small>firmographics with headcount</small></div>
+<div class="kpi"><b>~40%</b><small>of mismatches: Leadfeeder has the right organization</small></div>
+<div class="kpi"><b>4,452</b><small>IPs tested</small></div>
+<div class="kpi"><b>3,468 / 5,000</b><small>trial API Matches used</small></div>
+</div>
+
+<div class="card">
+<h2>Results by sample group</h2>
+<p class="note">Click a tab to switch metric. See the explanation tables below for how each one is calculated.</p>
+<div class="tabs" id="tabs">
+<button data-k="co" aria-pressed="true">Returns company</button>
+<button data-k="sn" aria-pressed="false">Returns shared_network</button>
+<button data-k="nd" aria-pressed="false">No domain</button>
+<button data-k="mt" aria-pressed="false">Domain matches Kickfire</button>
+</div>
+<div id="bars"></div>
+
+<h3>Sample groups explained</h3>
+<div class="tw"><table>
+<thead><tr><th>Group</th><th>Meaning</th><th>What it measures</th><th>Main result</th><th class="n">IPs</th></tr></thead>
+<tbody>
+<tr><td>agree</td><td>Kickfire good, IPinfo good, same domain. Two independent vendors agree, so this is treated as near ground truth.</td><td>Does Leadfeeder match this answer?</td><td>98.6% return company; 69.1% match Kickfire domain</td><td class="n">1,024</td></tr>
+<tr><td>disagree</td><td>Kickfire good, IPinfo good, but different domains.</td><td>Who is right on the hard IPs?</td><td>94.5% return company; 24.1% match Kickfire domain</td><td class="n">1,027</td></tr>
+<tr><td>kf_good_only</td><td>Kickfire good, IPinfo not good (IPinfo usually returns an ISP).</td><td>Does Leadfeeder keep Kickfire’s coverage?</td><td>83.8% return company; 39.2% match Kickfire domain</td><td class="n">1,222</td></tr>
+<tr><td>kf_notgood</td><td>Kickfire has a match but checkValid rejects it (ISP/mobile/wifi).</td><td>How does Leadfeeder filter network providers?</td><td>51.6% return company; 48.1% return shared_network</td><td class="n">628</td></tr>
+<tr><td>kf_nomatch</td><td>Kickfire returns no result.</td><td>Can Leadfeeder find additional companies?</td><td>26.7% return company; 73.1% return shared_network</td><td class="n">521</td></tr>
+<tr><td>ipv6</td><td>IPv6, present only in the pilot run.</td><td>How Leadfeeder handles IPv6</td><td>0 return company; 30/30 return shared_network</td><td class="n">30</td></tr>
+</tbody></table></div>
+<p class="note" style="margin-top:10px">Groups are based on the Kickfire and IPinfo data already in the sheet. IPs is the number of IPs sent to Leadfeeder per group.</p>
+
+<h3>Metrics explained</h3>
+<div class="tw"><table>
+<thead><tr><th>Metric</th><th>Meaning</th><th>Calculation</th></tr></thead>
+<tbody>
+<tr><td>Returns company</td><td>Leadfeeder returns a company (company_type = company) and is billed as 1 API Match.</td><td>IPs returning company ÷ IPs in the group</td></tr>
+<tr><td>Returns shared_network</td><td>Leadfeeder identifies the IP as a network provider (ISP, hosting, CDN, proxy). No company returned, no match billed.</td><td>IPs returning shared_network ÷ IPs in the group</td></tr>
+<tr><td>No domain</td><td>A company is returned but url and alternative_urls are missing, so a company cannot be created.</td><td>IPs with no domain ÷ IPs returning company</td></tr>
+<tr><td>Domain matches Kickfire</td><td>The domain Leadfeeder returns equals the Kickfire domain. Only computable for the 3 Kickfire-good groups; the rest are n/a.</td><td>IPs with matching domain ÷ IPs returning company</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>Manual labeling: 300 mismatched IPs</h2>
+<p class="note">Sample: US IPs where Kickfire is good but Leadfeeder returns a different domain. Evidence: RDAP, PTR, DNS. No API Match consumed.</p>
+<div id="label"></div>
+</div>
+<div class="card">
+<h2>Estimate across ~1,300 mismatched IPs</h2>
+<p class="note">When the vendors disagree, who is right?</p>
+<div class="stack" id="est"></div>
+<div class="legend" id="estl"></div>
+<p class="note" style="margin-top:10px">“Leadfeeder right” includes same organization and related companies.</p>
+</div>
+</div>
+
+<div class="card">
+<h2>Scorecard by criterion</h2>
+<div class="tw"><table>
+<thead><tr><th>Criterion</th><th>Result</th><th>Assessment</th></tr></thead>
+<tbody>
+<tr><td>Coverage of IPs Kickfire already identifies (US)</td><td>91.9% return company</td><td><span class="tag t-good">On par with Kickfire</span></td></tr>
+<tr><td>Extra finds on IPs Kickfire skips</td><td>27% of Kickfire no-match, 52% of Kickfire “not good”</td><td><span class="tag t-warn">Mostly low confidence</span></td></tr>
+<tr><td>Network provider filtering</td><td>shared_network catches ISP, hosting, CDN, proxy</td><td><span class="tag t-good">Better than Kickfire</span></td></tr>
+<tr><td>Domain match with Kickfire</td><td>45% overall; 70% where Kickfire and IPinfo share a domain</td><td><span class="tag t-warn">See manual labeling</span></td></tr>
+<tr><td>Has a domain to create a company</td><td>88.7%</td><td><span class="tag t-warn">~11% lost</span></td></tr>
+<tr><td>Firmographics</td><td>Address 79–87%, headcount 97%, revenue 68%, LinkedIn 73%</td><td><span class="tag t-good">Good; no NAICS/SIC</span></td></tr>
+<tr><td>Confidence for filtering</td><td>very_high/high overlap Kickfire 54–60%, low only 24%</td><td><span class="tag t-good">Usable</span></td></tr>
+</tbody></table></div>
+</div>
+
+<div class="grid2">
+<div class="card">
+<h2>Strengths and weaknesses</h2>
+<ul>
+<li><b class="t-bad">Weak:</b> small businesses with their own registered IP blocks (SWIP) on Charter/Comcast. Where Kickfire and IPinfo share a domain, Kickfire is right on 37 IPs and Leadfeeder on only 10.</li>
+<li><b class="t-good">Strong:</b> IPs routed through an MSP or an education/government network. Leadfeeder returns the organization actually using the IP: OARnet becomes University of Akron, State of NC becomes Nash County.</li>
+</ul>
+</div>
+<div class="card">
+<h2>Conditions to replace Kickfire</h2>
+<ul>
+<li>Rewrite checkValid and map company_type to flags (Leadfeeder has no isISP/isMobile/isWifi).</li>
+<li>Normalize domains from url and add a junk-domain blacklist.</li>
+<li>Source NAICS/SIC entirely from CAPI.</li>
+<li>Use the manual labeling results to decide who is right when domains differ.</li>
+<li>Get an API-only plan quote and review the DPA.</li>
+</ul>
+</div>
+</div>
+
+<div class="card">
+<h2>Agree group: 300 mismatched IPs (30%)</h2>
+<p class="note">Kickfire and IPinfo gave the same domain; Leadfeeder returned something different.</p>
+<div id="agree"></div>
+<p class="note" style="margin-top:14px">In the “entirely different company” bucket (114 IPs): some are renames or mergers that name matching misses (AES Indiana, formerly Indianapolis Power &amp; Light; Cellphone-Mate and SureCall). Some may be cases where Leadfeeder is more correct: Kickfire and IPinfo both rely on WHOIS, so they return whoever registered the IP block (an MSP or IT provider), while Leadfeeder relies on traffic and returns the organization actually using the IP (Network Outsource / Central Islip Schools, State of NC / Nash County). Some are clearly wrong, such as sourcing.hktdc.com for American Dehydrated Foods.</p>
+</div>
+
+<div class="card">
+<h2>API Match used: 3,468 / 5,000 of the trial</h2>
+<p>An API Match is a billable Leadfeeder lookup: a 200 response that returns a company (company_type = company, meta.num_results = 1). shared_network responses are not billed.</p>
+<div class="stack"><div style="width:77.9%;background:var(--a)">3,468 billed</div><div style="width:22.1%;background:var(--d);color:var(--ink)">984 not billed</div></div>
+<div class="legend"><span><i style="background:var(--a)"></i>Returns company: 1 match billed</span><span><i style="background:var(--d)"></i>Network provider or no company data</span></div>
+<p style="margin-top:14px">Trial quota: 3,468 of 5,000 used, about 1,500 matches left.</p>
+<div class="track" style="height:20px"><span class="fill" style="width:69.4%;background:var(--b)"></span></div>
+<ul>
+<li>4,452 IPs were called but only 3,468 matches were consumed. The other 984 were network providers or had no company data.</li>
+<li>5,000 is the trial’s match limit, confirmed by Leadfeeder via live chat.</li>
+<li>The ~1,500 remaining matches are for further testing. This figure does not yet subtract a few manual calls made in Postman.</li>
+<li><b>Trial expiry does not auto-bill:</b> Leadfeeder confirmed that when the trial ends or the 5,000 matches run out, the account does not switch to a paid plan and no invoice is generated. Past the limit, the API only returns a quota_exceeded error.</li>
+</ul>
+<p class="note" style="margin-top:12px">Throughput: 2 threads, ~2.1 requests/second. About 10 transient network errors, all retried successfully.</p>
+</div>
+</section><section id="snitcher" hidden><h1>Leadfeeder IP Enrich API vs Snitcher IP2Company API</h1>
+<p><em>Prepared: 2026-10-22 · Purpose: choose an IP-to-company service to replace Kickfire in the <code>Handle_RevealedCompanies</code> flow</em></p>
+<blockquote>
+<p><strong>How reliable are the numbers?</strong></p>
+<ul>
+<li><strong>Leadfeeder:</strong> actually tested on 4,452 IPs from the “Ip Companies” sheet, plus 300 IPs labeled by hand. Details are in <a href="#kickfire" class="goto">the Leadfeeder vs Kickfire evaluation</a> (first tab).</li>
+<li><strong>Snitcher:</strong> <strong>not tested.</strong> Information comes from public docs, the OpenAPI spec and the T&amp;C.</li>
+</ul>
+</blockquote>
+<h2>1. Conclusion</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Leadfeeder</th>
+<th>Snitcher</th>
+<th>Better option</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Verified data quality</td>
+<td>✅ Returns a company for 92% of US IPs that Kickfire identifies. When it disagrees with Kickfire, Leadfeeder is usually the one that is right</td>
+<td>❓ Not tested. 2024 Syft benchmark: precision <strong>20%</strong> (Leadfeeder <strong>42%</strong>)</td>
+<td><strong>Leadfeeder</strong></td>
+</tr>
+<tr>
+<td>Network provider detection</td>
+<td><code>company_type = shared_network</code>, with the network provider’s name</td>
+<td>HTTP 404 + <code>type: isp</code>, with the ISP’s domain</td>
+<td>Tie</td>
+</tr>
+<tr>
+<td>Enough fields for the <code>Companies</code> table</td>
+<td>More: confidence, lat/long, 5 social networks, parent company, logo</td>
+<td>Fewer, but a clean domain and a phone number</td>
+<td><strong>Leadfeeder</strong></td>
+</tr>
+<tr>
+<td>Fit with current code</td>
+<td><code>url</code> must be normalized</td>
+<td>Domain is usable as is and <code>type</code> can replace <code>businessType</code>. But there is an extra <strong>202</strong> status to handle</td>
+<td>Nearly tied</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Not published</td>
+<td>Not published</td>
+<td>Cannot compare yet</td>
+</tr>
+<tr>
+<td>Terms</td>
+<td>❌ <strong>Must delete data within 30 days</strong> of termination. ✅ Allows use inside our product</td>
+<td>✅ No deletion required. ❌ <strong>T&amp;C prohibit commercial exploitation</strong>. ❌ Snitcher can <strong>terminate at any time without notice</strong></td>
+<td>Depends on negotiation</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Recommendation:</strong></p>
+<ul>
+<li><strong>Leadfeeder is the better fit today</strong>, because it is the only vendor verified on real data.</li>
+<li>Snitcher has the advantage on data-retention terms, but its quality is unknown and its public T&amp;C do not allow commercial use.</li>
+<li><strong>Before deciding, test Snitcher on the same set of IPs</strong> (see section 8). If its quality is comparable to Leadfeeder’s, Snitcher is worth considering thanks to better data terms.</li>
+</ul>
+<h2>2. Cost</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Leadfeeder IP Enrich API</th>
+<th>Snitcher IP2Company API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Public price</td>
+<td>❌ None. Ask sales</td>
+<td>❌ None. Falls under “For platforms &amp; developers”; ask sales</td>
+</tr>
+<tr>
+<td>Price on the pricing page</td>
+<td>Web Visitors €79–€2,089/month. <strong>Does not apply to the IP Enrich API</strong></td>
+<td>Platform $49–$529/month for 50–5,000 companies. <strong>Does not apply to IP2Company</strong></td>
+</tr>
+<tr>
+<td>Billing unit</td>
+<td><strong>API Match.</strong> Per the terms: every 200 response. In testing, <code>shared_network</code> responses had <code>num_results = 0</code></td>
+<td><strong>Credit.</strong> Unclear whether 404 (<code>isp</code>) and 202 responses consume credits</td>
+</tr>
+<tr>
+<td>Trial</td>
+<td>✅ Already used: <strong>5,000 matches</strong>, expires on its own, does not convert to a paid plan</td>
+<td>❌ No self-service signup. Must contact sales for a key. The docs’ examples suggest a trial key may have only <strong>100 credits</strong>. The 14-day trial on the pricing page is for Platform (installing a tracker on your own site) and <strong>cannot look up a list of IPs</strong></td>
+</tr>
+<tr>
+<td>Contract term</td>
+<td>12 months, auto-renews, 30 days’ notice to cancel. Price increase <strong>capped at 5%/year</strong></td>
+<td>Auto-renews per plan. <strong>No refunds</strong> (§9.3). Annual price increases allowed, <strong>no cap</strong> (§9.6)</td>
+</tr>
+<tr>
+<td>Estimated volume</td>
+<td>50k lookups/month × 62–78% match rate = <strong>31k–39k matches/month</strong></td>
+<td>Similar if 404s are not billed. If they are billed, <strong>50k credits/month</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Budget benchmark:</strong> the budget was once set at about <strong>$10k/year</strong>. With roughly 375k–470k matches/year, the unit price must be below about <strong>$0.021–0.027/match</strong> to fit. We need quotes from both vendors to compare.</p>
+<h2>3. Fields for the <code>Companies</code> table</h2>
+<p>Legend: ✅ available · ⚠️ available but needs handling · ❌ not available. The “% LF has data” column is measured on the 3,468 companies returned in the Leadfeeder test.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th><code>Companies</code> column</th>
+<th>Leadfeeder</th>
+<th>% LF has data</th>
+<th>Snitcher</th>
+<th>Fallback source when both lack it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>companyName</code></td>
+<td>✅ <code>name</code> (legal name)</td>
+<td>100%</td>
+<td>✅ <code>company.name</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>website</code> / <code>domain</code></td>
+<td>⚠️ <code>url</code> includes <code>https://</code>, path and <code>www.</code>; must be normalized</td>
+<td>89%</td>
+<td>✅ <strong><code>domain</code> is already clean</strong>, plus <code>website</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>tradeName</code></td>
+<td>⚠️ <code>alternative_names</code></td>
+<td>—</td>
+<td>❌</td>
+<td>Lost</td>
+</tr>
+<tr>
+<td><code>street</code></td>
+<td>✅ <code>street_address</code></td>
+<td>79%</td>
+<td>✅ <code>geo.street</code> + <code>street_number</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>city</code></td>
+<td>✅</td>
+<td>87%</td>
+<td>✅ <code>geo.city</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>postal</code></td>
+<td>✅</td>
+<td>80%</td>
+<td>✅ <code>geo.postal_code</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>region</code></td>
+<td>✅</td>
+<td>79%</td>
+<td>✅ <code>geo.state</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>regionShort</code></td>
+<td>⚠️ format <code>US_CA</code>, includes the value <code>unknown_US</code></td>
+<td>~90%</td>
+<td>✅ <code>geo.state_code</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>country</code></td>
+<td>⚠️ always null, must be derived from the code</td>
+<td>0%</td>
+<td>✅ <code>geo.country</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>countryShort</code></td>
+<td>✅</td>
+<td>100%</td>
+<td>✅ <code>geo.country_code</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>latitude</code>, <code>longitude</code></td>
+<td>✅ <code>geo</code></td>
+<td>73%</td>
+<td>❌</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>phone</code></td>
+<td>⚠️</td>
+<td>10%</td>
+<td>✅ <code>company.phone</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>employees</code></td>
+<td>⚠️ <code>employee_range</code> (format <code>1,001-5,000</code>) / <code>employee_count</code></td>
+<td>76% / 97%</td>
+<td>⚠️ format <code>"2-10 employees"</code>, must be mapped</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>revenue</code></td>
+<td>⚠️ exact number, <strong>multiple currencies</strong></td>
+<td>68%</td>
+<td>⚠️ <code>annual_revenue</code>: docs say number, marketing page says range (<code>$10M-$50M</code>). Inconsistent</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>naicsCode</code> (and the 4 derived NAICS columns)</td>
+<td>❌ (NACE only)</td>
+<td>—</td>
+<td>❌ (<code>industry</code> is free text)</td>
+<td><strong>CAPI</strong></td>
+</tr>
+<tr>
+<td><code>sicCode</code></td>
+<td>❌</td>
+<td>—</td>
+<td>❌</td>
+<td><strong>CAPI</strong></td>
+</tr>
+<tr>
+<td><code>sicGroup</code>, <code>sicDesc</code></td>
+<td>❌</td>
+<td>—</td>
+<td>❌</td>
+<td><strong>Lost</strong> unless we add an SIC lookup table</td>
+</tr>
+<tr>
+<td><code>stockSymbol</code></td>
+<td>❌</td>
+<td>—</td>
+<td>❌</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>linkedIn</code></td>
+<td>✅</td>
+<td>73%</td>
+<td>✅ <code>profiles.linkedin</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>facebook</code>, <code>twitter</code>, <code>instagram</code>, <code>youtube</code></td>
+<td>✅</td>
+<td>39% / 36% / 37% / 20%</td>
+<td>❌ (docs list only LinkedIn and Crunchbase)</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>isISP</code></td>
+<td>✅ <code>shared_network</code></td>
+<td>100%</td>
+<td>✅ 404 + <code>type: isp</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>isMobile</code>, <code>isWifi</code></td>
+<td>❌</td>
+<td>—</td>
+<td>❌</td>
+<td><strong>Lost</strong></td>
+</tr>
+<tr>
+<td><code>confidence</code></td>
+<td>✅ 4 levels (very_high → low). Verified: filters out junk</td>
+<td>100%</td>
+<td>⚠️ only a <code>fuzzy</code> flag (true/false), meaning unclear</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>businessType</code></td>
+<td>❌ (computed by us today)</td>
+<td>—</td>
+<td>✅ <code>type</code>: business / educational / government</td>
+<td>Compute ourselves as today</td>
+</tr>
+<tr>
+<td><code>timeZoneId</code>, <code>timeZoneName</code>, <code>utcOffset</code>, <code>dstOffset</code></td>
+<td>❌</td>
+<td>—</td>
+<td>❌</td>
+<td><strong>Lost</strong> unless computed from lat/long</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>✅</td>
+<td>66%</td>
+<td>✅</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>yearFounded</code></td>
+<td>⚠️</td>
+<td>2%</td>
+<td>✅ <code>founded_year</code></td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td><code>logo</code></td>
+<td>✅</td>
+<td>82%</td>
+<td>❌</td>
+<td>CAPI</td>
+</tr>
+<tr>
+<td>Parent company (<code>companyParent</code>)</td>
+<td>✅ <code>role</code> + <code>group_company</code></td>
+<td>—</td>
+<td>❌</td>
+<td>CAPI</td>
+</tr>
+</tbody>
+</table></div>
+<p>Columns provided only by CAPI (<code>alexaRank</code>, <code>technologies</code>, <code>industries</code>, <code>monthlyVisitors</code>…) and system columns (<code>id</code>, <code>createdAt</code>, <code>dataSources</code>…) are unaffected, whichever vendor is chosen.</p>
+<p><strong>Columns lost with both vendors:</strong></p>
+<ul>
+<li><code>isMobile</code>, <code>isWifi</code></li>
+<li><code>sicGroup</code>, <code>sicDesc</code></li>
+<li>The 4 timezone columns</li>
+<li>Snitcher additionally loses <code>tradeName</code></li>
+</ul>
+<p><strong>Columns that depend entirely on CAPI:</strong></p>
+<ul>
+<li>Both vendors: NAICS/SIC, <code>stockSymbol</code></li>
+<li>Snitcher additionally: lat/long, Facebook, Twitter, Instagram, YouTube, logo</li>
+</ul>
+<h2>4. Fit with the current flow</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Point</th>
+<th>Leadfeeder</th>
+<th>Snitcher</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How to call</td>
+<td><code>GET /v1/ip/enrich?ip=&amp;account_id=</code>, header <code>X-Api-Key</code></td>
+<td><code>POST /company/find?ip=</code>, header <code>Authorization: Bearer</code></td>
+</tr>
+<tr>
+<td>Domain → <code>companyId = uuidv5(domain)</code></td>
+<td>Must normalize <code>url</code>. 11% of results have no domain. Some junk domains (facebook.com, mapquest.com…)</td>
+<td>Domain is already clean, lower risk of generating a wrong <code>companyId</code></td>
+</tr>
+<tr>
+<td>Network filtering in <code>checkValid</code></td>
+<td><code>shared_network</code> → <code>IGNORED</code>. Universities and hospitals are <strong>also filtered</strong> (unlike Kickfire)</td>
+<td><code>isp</code> → <code>IGNORED</code>. Universities and government bodies <strong>remain companies</strong> (like Kickfire)</td>
+</tr>
+<tr>
+<td>Extra status to handle</td>
+<td>None</td>
+<td><strong>202 “looking up more”</strong>: retry after a few seconds or push back onto the queue</td>
+</tr>
+<tr>
+<td>Rate limit</td>
+<td>Not published. No 429s when testing (~2 requests/second)</td>
+<td><strong>600 requests/minute</strong>, can be raised by contract</td>
+</tr>
+<tr>
+<td>Quota exhausted</td>
+<td>429 <code>quota_exceeded</code></td>
+<td>403</td>
+</tr>
+<tr>
+<td>Lookup by domain (<code>?website=</code>)</td>
+<td>Not available. Move fully to CAPI</td>
+<td>Not available. Move fully to CAPI</td>
+</tr>
+<tr>
+<td>IPv6</td>
+<td>Supported. In testing, every IPv6 returned <code>shared_network</code></td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Telling mobile / wifi / hosting apart</td>
+<td>No (all folded into <code>shared_network</code>)</td>
+<td>No. Docs do not say how hosting IPs are returned</td>
+</tr>
+</tbody>
+</table></div>
+<h2>5. Pros and cons</h2>
+<h3>Leadfeeder</h3>
+<p><strong>Pros</strong></p>
+<ul>
+<li>Verified on real data. Coverage on par with Kickfire, and it identifies the real organization behind an MSP or an education network (e.g. OARnet → University of Akron).</li>
+<li><code>confidence</code> is usable: dropping the <code>low</code> level removes most of the junk from hosting/VPN/mobile.</li>
+<li>Many fields. Includes parent company, which supports merging subsidiaries later.</li>
+<li>The terms <strong>explicitly allow</strong> using the data in our own product (“Integrated Data Offering”).</li>
+<li>Trial already used, and the working process with sales is clear.</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul>
+<li>Data must be deleted within 30 days of contract termination. The contract auto-renews for 12 months.</li>
+<li>Domains need normalization. 11% of results have no domain. Revenue comes back in multiple currencies.</li>
+<li>Weak on small businesses with their own registered IP blocks (SWIP).</li>
+<li><code>shared_network</code> also filters out universities and hospitals. Customers may lose these companies compared with Kickfire.</li>
+</ul>
+<h3>Snitcher</h3>
+<p><strong>Pros</strong></p>
+<ul>
+<li>The T&amp;C do not require deleting data on termination.</li>
+<li>Clean domain. Has a phone number. <code>type</code> classifies business/edu/gov the way our system already does.</li>
+<li>The rate limit is clearly published (600 requests/minute).</li>
+<li>EU legal entity (Netherlands), Dutch law applies.</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul>
+<li><strong>Quality is unverified.</strong> The public benchmark is low (precision 20%).</li>
+<li>No real confidence score, no lat/long, and LinkedIn is the only social network.</li>
+<li>The 202 status makes the Lambda flow more complex.</li>
+<li>The public T&amp;C are generic SaaS terms, <strong>with no API-specific terms</strong>.</li>
+<li>No self-service trial. Trial credits may be very few.</li>
+</ul>
+<h2>6. Terms that do not fit our system</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Leadfeeder (<a href="https://www.leadfeeder.com/terms/supplementary-terms-and-conditions/">Supplementary Terms</a>)</th>
+<th>Snitcher (<a href="https://www.snitcher.com/terms-conditions">T&amp;C</a>, updated 2024-11-26)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Commercial use / showing to customers</strong></td>
+<td>✅ Allowed, within the “Integrated Data Offering” (§2). Leadfeeder data may not be listed as a separate line in quotes (§2.1)</td>
+<td>❌ §3.1 prohibits <em>“sell, trade, resell, or exploit for any commercial purposes any portion or use of … the Service”</em>. <strong>An order form stating the exception is required</strong> (§13.4 allows a separate order form)</td>
+</tr>
+<tr>
+<td><strong>Deleting data on termination</strong></td>
+<td>❌ Delete all “Leadfeeder Data and Data Outputs” within 30 days. Audit rights apply (§5.2)</td>
+<td>✅ Not mentioned. The right to keep data should be written into the order form</td>
+</tr>
+<tr>
+<td><strong>Vendor terminates or stops the service</strong></td>
+<td>May change or discontinue the API without notice (§1). If suspended, 1 week’s notice, but <strong>fees still apply</strong> (§2.1)</td>
+<td>❌ <strong>§13.6: may terminate “without cause or notice”</strong>, and may delete all related information. §5.1: may modify or discontinue the service at any time</td>
+</tr>
+<tr>
+<td><strong>SLA</strong></td>
+<td>None</td>
+<td>Only with a separately signed SLA (§4.1)</td>
+</tr>
+<tr>
+<td><strong>Renewal and pricing</strong></td>
+<td>12 months, auto-renews. Price increase capped at 5%/year (§5.1)</td>
+<td>Auto-renews. <strong>No refunds</strong> (§9.3, §13.5). Annual price increases, no cap (§9.6)</td>
+</tr>
+<tr>
+<td><strong>Changes to terms</strong></td>
+<td>Deemed accepted if no objection within 2 weeks (§7)</td>
+<td>30 days’ notice. Continued use means acceptance (§14)</td>
+</tr>
+<tr>
+<td><strong>Vendor’s limit of liability</strong></td>
+<td>Not in the Supplementary Terms (it is in the GTC)</td>
+<td>Capped at <strong>3 months of fees</strong> (§10.1)</td>
+</tr>
+<tr>
+<td><strong>Our indemnity to the vendor</strong></td>
+<td>When we breach the terms or data-protection law (§6)</td>
+<td>Broader: arising from <strong>any use of the service</strong> by us (§11)</td>
+</tr>
+<tr>
+<td><strong>Vendor uses our name/logo for marketing</strong></td>
+<td>Yes (§4)</td>
+<td>Yes, unless we object in writing (§7.1)</td>
+</tr>
+<tr>
+<td><strong>Governing law</strong></td>
+<td>Per the GTC (Dealfront Group GmbH, Germany)</td>
+<td>Dutch law, Dutch courts (§16.1)</td>
+</tr>
+<tr>
+<td><strong>DPA</strong></td>
+<td>Not reviewed</td>
+<td>Only a “GDPR Compliant” badge seen. Trust centre at trust.snitcher.com, not reviewed</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Applies to both:</strong> whichever vendor is chosen, we still have to deal with the terms of <strong>TheCompaniesAPI (CAPI)</strong>. Under its <a href="https://www.thecompaniesapi.com/product/terms">Terms of Use</a> §4.1, CAPI allows “internal business purposes only”. Meanwhile both options need CAPI to fill in NAICS/SIC.</p>
+<h2>7. What to negotiate</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>With Leadfeeder</th>
+<th>With Snitcher</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remove or relax §5.2: allow keeping data already attached to visit history, or require deleting only the raw data</td>
+<td>Order form states: may show to customers, may cache for about 45 days, may keep data after termination</td>
+</tr>
+<tr>
+<td>State that <code>shared_network</code> does not count as an API Match</td>
+<td>State that 404 (<code>isp</code>) and 202 do not consume credits</td>
+</tr>
+<tr>
+<td>Ask for an SLA</td>
+<td>Remove the right to terminate without notice (§13.6). Ask for an SLA</td>
+</tr>
+<tr>
+<td>Term shorter than 12 months, or quarterly payment</td>
+<td>Price-increase cap, refund policy</td>
+</tr>
+<tr>
+<td>Exclude use of our logo (if needed)</td>
+<td>Exclude use of our logo (if needed)</td>
+</tr>
+<tr>
+<td>Quote for about 300k and 500k matches/year</td>
+<td>Quote for about 50k lookups/month</td>
+</tr>
+</tbody>
+</table></div>
+<h2>8. How to test Snitcher</h2>
+<ol>
+<li><strong>Get a key:</strong> fill in the form at https://www.snitcher.com/ip-to-company-api or contact sales. Ask for a trial key with about <strong>5,000 credits</strong>, plus the questions in section 7.</li>
+<li><strong>Quick try in Postman:</strong><ul>
+<li><code>POST https://api.snitcher.com/company/find?ip={ip}</code>, header <code>Authorization: Bearer {key}</code>.</li>
+<li>Check remaining credits: <code>https://api.snitcher.com/company/usage</code>.</li>
+</ul>
+</li>
+<li><strong>Benchmark:</strong><ul>
+<li>Run 200 IPs first and compare against <code>/company/usage</code> to learn whether 404s consume credits.</li>
+<li>Then run all <strong>4,452 IPs</strong> already tested on Leadfeeder.</li>
+<li>If credits run short, run the <strong>300 hand-labeled IPs</strong>.</li>
+<li>Compare coverage, network-provider detection rate, field coverage, and accuracy on the labeled set.</li>
+</ul>
+</li>
+<li><strong>Script:</strong> reuse <code>research_notes/Dịch vụ thay thế Kickfire/leadfeeder/lf_bench/run.js</code> (caches raw responses, has backoff) and add handling for the 202 status.</li>
+</ol>
+<p>IPs to try in step 2:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>IP</th>
+<th>Type</th>
+<th>Expected result / purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>73.158.64.15</code></td>
+<td>Comcast</td>
+<td>Should return 404 <code>isp</code></td>
+</tr>
+<tr>
+<td><code>24.97.56.2</code></td>
+<td>Animal Refuge League</td>
+<td>Kickfire right, Leadfeeder wrong</td>
+</tr>
+<tr>
+<td><code>204.211.84.120</code></td>
+<td>Nash County</td>
+<td>Leadfeeder right, Kickfire wrong</td>
+</tr>
+<tr>
+<td><code>3.5.140.2</code></td>
+<td>AWS</td>
+<td>See how a hosting IP is returned</td>
+</tr>
+</tbody>
+</table></div>
+<h2>9. Sources</h2>
+<ul>
+<li>Leadfeeder: <a href="https://www.leadfeeder.com/terms/supplementary-terms-and-conditions/">IP Enrich Supplementary Terms</a> · <a href="https://www.leadfeeder.com/pricing/">Pricing</a> · <a href="https://www.leadfeeder.com/ip-enrich-api/">IP Enrich API</a></li>
+<li>Snitcher: <a href="https://www.snitcher.com/terms-conditions">Terms &amp; Conditions</a> · <a href="https://www.snitcher.com/pricing">Pricing</a> · <a href="https://www.snitcher.com/ip-to-company-api">IP to Company API</a> · <a href="https://docs.snitcher.com/powered-by-snitcher/ip2company/introduction.md">IP2Company Introduction</a> · <a href="https://docs.snitcher.com/powered-by-snitcher/ip2company/quickstart.md">Quickstart</a> · <a href="https://app.snitcher.com/api/radar/docs?api-radar-docs.json">OpenAPI</a></li>
+<li>TheCompaniesAPI: <a href="https://www.thecompaniesapi.com/product/terms">Terms of Use</a></li>
+<li>Leadfeeder figures: <a href="#kickfire" class="goto">Leadfeeder vs Kickfire evaluation</a> (first tab)</li>
+</ul></section></main><script>
+var G=[
+{n:"agree",t:1024,co:1010,sn:14,nd:95,mt:698},
+{n:"disagree",t:1027,co:971,sn:55,nd:121,mt:234},
+{n:"kf_good_only",t:1222,co:1024,sn:195,nd:91,mt:401},
+{n:"kf_notgood",t:628,co:324,sn:302,nd:53,mt:null},
+{n:"kf_nomatch",t:521,co:139,sn:381,nd:32,mt:null},
+{n:"ipv6",t:30,co:0,sn:30,nd:0,mt:null}];
+var fmt=function(x){return x.toLocaleString("en-US",{maximumFractionDigits:1})};
+function bars(k){
+ var h="";
+ G.forEach(function(g){
+  var den=(k==="nd")?g.co:g.t,num=g[k];
+  if(num===null||!den){h+='<div class="row"><span>'+g.n+'</span><span class="track"></span><span class="v">n/a</span></div>';return;}
+  var p=num/den*100;
+  h+='<div class="row"><span>'+g.n+' <small style="color:var(--mute)">('+num+')</small></span><span class="track"><span class="fill" style="width:'+p+'%;background:var(--a)"></span></span><span class="v">'+fmt(p)+'%</span></div>';
+ });
+ document.getElementById("bars").innerHTML=h;
+}
+bars("co");
+document.querySelectorAll("#tabs button").forEach(function(b){
+ b.addEventListener("click",function(){
+  document.querySelectorAll("#tabs button").forEach(function(x){x.setAttribute("aria-pressed","false")});
+  b.setAttribute("aria-pressed","true");bars(b.dataset.k);
+ });
+});
+function hbars(id,data){
+ var max=Math.max.apply(null,data.map(function(d){return d[1]}));
+ document.getElementById(id).innerHTML=data.map(function(d){
+  return '<div class="row"><span>'+d[0]+'</span><span class="track"><span class="fill" style="width:'+d[1]/max*100+'%;background:'+d[2]+'"></span></span><span class="v">'+d[1]+'</span></div>';
+ }).join("");
+}
+hbars("label",[
+["Leadfeeder right, Kickfire wrong",46,"var(--a)"],
+["Kickfire right, Leadfeeder wrong",73,"var(--b)"],
+["Same organization, domain usable",51,"var(--a)"],
+["Related company (parent/sub, rename)",22,"var(--a)"],
+["Right organization, wrong domain",27,"var(--c)"],
+["Both wrong (mobile, hosting/VPN)",28,"var(--bad)"],
+["Not enough evidence",53,"var(--d)"]]);
+hbars("agree",[
+["Kickfire domain in alternative_urls",7,"var(--a)"],
+["Matching name (alias, rename, subsidiary)",84,"var(--a)"],
+["Leadfeeder has no domain",95,"var(--d)"],
+["Entirely different company",114,"var(--b)"]]);
+var E=[["Leadfeeder right on organization",40,"var(--a)"],["Kickfire right, Leadfeeder wrong",20,"var(--b)"],["Both wrong",12,"var(--bad)"],["Right organization, wrong domain",8,"var(--c)"],["Undetermined",20,"var(--d)"]];
+document.getElementById("est").innerHTML=E.map(function(e){return '<div style="width:'+e[1]+'%;background:'+e[2]+'">~'+e[1]+'%</div>'}).join("");
+document.getElementById("estl").innerHTML=E.map(function(e){return '<span><i style="background:'+e[2]+'"></i>'+e[0]+'</span>'}).join("");
+
+function showTab(t){
+ t=(t==="snitcher")?"snitcher":"kickfire";
+ document.getElementById("kickfire").hidden=(t!=="kickfire");
+ document.getElementById("snitcher").hidden=(t!=="snitcher");
+ document.querySelectorAll("#nav button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.t===t?"true":"false")});
+}
+document.querySelectorAll("#nav button").forEach(function(b){
+ b.addEventListener("click",function(){showTab(b.dataset.t);try{location.hash=b.dataset.t}catch(e){}window.scrollTo(0,0);});
+});
+document.querySelectorAll("a.goto").forEach(function(a){
+ a.addEventListener("click",function(e){e.preventDefault();showTab("kickfire");window.scrollTo(0,0);});
+});
+showTab((location.hash||"").slice(1));
+</script></body></html>
